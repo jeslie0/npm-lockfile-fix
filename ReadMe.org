@@ -1,7 +1,9 @@
 #+title: ReadMe
-This is a small flake wrapper around a python script that adds missing "integrity" and "resolved" fields to a npm =package-lock.json= file.
+This is a small flake wrapper around a Python script that adds missing "integrity" and "resolved" fields to a npm =package-lock.json= file.
 
 You pass the path to =package-lock.json= as a command line argument to =npm-fixer=:
 #+begin_src shell
 npm-fixer ./path/to/package-lock.json
 #+end_src
+
+Currently, this project is only packaged as a nix flake. I will improve the Python packaging in due course.
