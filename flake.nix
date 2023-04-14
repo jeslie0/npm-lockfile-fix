@@ -18,7 +18,7 @@
             # Other python dependencies here
           ];
         };
-        packageName = "npm-fixer";
+        packageName = "npm-lockfile-fix";
       in
       {
         packages.${packageName} = pkgs.writers.writePython3Bin packageName {libraries = [pyPkgs.requests]; } (builtins.readFile ./src/main.py);
