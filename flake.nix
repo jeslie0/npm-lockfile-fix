@@ -15,21 +15,33 @@
         customPython = pkgs.python39.buildEnv.override {
           extraLibs = with pyPkgs; [
             ipython
-            # Other python dependencies here
+            setuptools
+            requests
           ];
         };
-        packageName = "npm-lockfile-fix";
+        packageName = with builtins; head (match "^.*name[[:space:]]*=[[:space:]][\"]([^[:space:]]*)[\"][,].*$" (readFile ./setup.py));
+        version = with builtins; head (match "^.*version[[:space:]]*=[[:space:]][\"]([^[:space:]]*)[\"][,].*$" (readFile ./setup.py));
       in
       {
-        packages.${packageName} = pkgs.writers.writePython3Bin packageName {libraries = [pyPkgs.requests]; } (builtins.readFile ./src/main.py);
 
-        defaultPackage = self.packages.${system}.${packageName};
+        packages.default = pyPkgs.buildPythonPackage {
+          pname = packageName;
+          inherit version;
+          src = ./.;
+          doCheck = false;
+
+          propagatedBuildInputs = [ pyPkgs.requests ];
+          meta = {
+            homepage = "https://github.com/jeslie0/npm-lockfile-fix";
+            description = "";
+            license = pkgs.lib.licenses.mit;
+          };
+        };
 
         devShell = pkgs.mkShell {
           packages = with pkgs;
             [ python310Packages.python-lsp-server ];
-          buildInputs = with pkgs;
-            [ customPython ];
+          inputsFrom = [ self.packages.${system}.default ];
         };
       }
     );
