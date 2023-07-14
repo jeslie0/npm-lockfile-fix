@@ -34,12 +34,12 @@ def main():
             version = package['version']
 
             # Fetch the package metadata from the registry
-            response = requests.get(registry_url + package_name)
+            response = requests.get(f"{registry_url + package_name}/{version}")
             if response.status_code == 200:
                 package_data = response.json()
                 # Get the dist field for the specific version
                 # of the package we care about
-                dist = package_data['versions'][version]['dist']
+                dist = package_data['dist']
                 # Update the package entry in the lockfile with the
                 # resolved and integrity values
                 package['resolved'] = dist['tarball']
@@ -49,7 +49,7 @@ def main():
             else:
                 # Print a message indicating that the package could not be fetched
                 print(f"Could not fetch metadata for {package_key}@{version}.")
-                print(f"foo {registry_url + package_name}")
+                print(f"foo {registry_url + package_name}/{version}")
                 print(f"Status code: {response.status_code}.")
 
     # Save the updated package-lock.json file
