@@ -53,7 +53,7 @@ def main():
                 print(f"Status code: {response.status_code}.")
 
     # Save the updated package-lock.json file
-    with open('package-lock.json', 'w') as f:
+    with open(lockfile_path, 'w') as f:
         json.dump(lockfile, f, indent=2)
 
 
