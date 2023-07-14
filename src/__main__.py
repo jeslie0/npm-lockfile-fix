@@ -17,42 +17,43 @@ def main():
         lockfile = json.load(f)
 
     # Loop over each package in the packages section of the lockfile
-    for package in lockfile['packages']:
-        # Ignore the empty key
-        if package == "":
+    for package_key in lockfile['packages']:
+        # Ignore the empty key & local packages
+        if package_key == "" or not package_key.startswith("node_modules/"):
             continue
 
-        # Check if the package is missing resolved and integrity fields
-        noResolved = 'resolved' not in lockfile['packages'][package]
-        noIntegrity = 'integrity' not in lockfile['packages'][package]
-        if noResolved or noIntegrity:
-            # Get the package version from the lockfile
-            version = lockfile['packages'][package]['version']
+        package = lockfile['packages'][package_key]
+        package_name = package.get("name") or package_key.split("node_modules/")[-1]
 
-            # Remove the "node_modules/" prefix from the package name
-            package_name = package.split("/")[-1]
+        # Check if the package is missing resolved and integrity fields
+        noResolved = 'resolved' not in package
+        noIntegrity = 'integrity' not in package
+        noLink = 'link' not in package
+        if noResolved or (noIntegrity and noLink):
+            # Get the package version from the lockfile
+            version = package['version']
 
             # Fetch the package metadata from the registry
-            response = requests.get(registry_url + package_name)
+            response = requests.get(f"{registry_url + package_name}/{version}")
             if response.status_code == 200:
                 package_data = response.json()
                 # Get the dist field for the specific version
                 # of the package we care about
-                dist = package_data['versions'][version]['dist']
+                dist = package_data['dist']
                 # Update the package entry in the lockfile with the
                 # resolved and integrity values
-                lockfile['packages'][package]['resolved'] = dist['tarball']
-                lockfile['packages'][package]['integrity'] = dist['integrity']
+                package['resolved'] = dist['tarball']
+                package['integrity'] = dist['integrity']
                 # Print a message indicating that the package was updated
-                print(f"{package}@{version} updated.")
+                print(f"{package_key}@{version} updated.")
             else:
                 # Print a message indicating that the package could not be fetched
-                print(f"Could not fetch metadata for {package}@{version}.")
-                print(f"foo {registry_url + package}")
+                print(f"Could not fetch metadata for {package_key}@{version}.")
+                print(f"foo {registry_url + package_name}/{version}")
                 print(f"Status code: {response.status_code}.")
 
     # Save the updated package-lock.json file
-    with open('package-lock.json', 'w') as f:
+    with open(lockfile_path, 'w') as f:
         json.dump(lockfile, f, indent=2)
 
 
