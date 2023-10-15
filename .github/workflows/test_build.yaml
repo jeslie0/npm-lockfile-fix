@@ -1,0 +1,22 @@
+name: Test to see if packages builds with nix
+run-name: Test to see if package builds with nix
+on:
+  push
+
+jobs:
+  Update-JSON-Data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setting up Checkout
+        uses: actions/checkout@v3
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Nix
+        uses: cachix/install-nix-action@v18
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Try to build package
+        run: |
+          nix build
