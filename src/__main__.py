@@ -19,7 +19,7 @@ def main():
     # Loop over each package in the packages section of the lockfile
     for package_key in lockfile['packages']:
         # Ignore the empty key & local packages
-        if package_key == "" or not package_key.startswith("node_modules/"):
+        if package_key == "" or not "node_modules/" in package_key:
             continue
 
         package = lockfile['packages'][package_key]
