@@ -1,5 +1,5 @@
-name: Test to see if packages builds with nix
-run-name: Test to see if package builds with nix
+name: Test to see if package builds with Nix
+run-name: Test to see if package builds with Nix
 on:
   push
 
