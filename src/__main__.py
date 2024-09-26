@@ -16,6 +16,8 @@ def main():
     with open(lockfile_path, 'r') as f:
         lockfile = json.load(f)
 
+    s = requests.Session()
+
     # Loop over each package in the packages section of the lockfile
     for package_key in lockfile['packages']:
         # Ignore the empty key & local packages
@@ -34,7 +36,7 @@ def main():
             version = package['version']
 
             # Fetch the package metadata from the registry
-            response = requests.get(f"{registry_url + package_name}/{version}")
+            response = s.get(f"{registry_url + package_name}/{version}")
             if response.status_code == 200:
                 package_data = response.json()
                 # Get the dist field for the specific version
