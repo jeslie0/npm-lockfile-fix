@@ -2,3 +2,4 @@
 .envrc
 result
 build
+npm_lockfile_fix.egg-info/
