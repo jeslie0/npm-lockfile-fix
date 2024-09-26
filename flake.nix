@@ -65,7 +65,16 @@
                 default =
                   pkgs.mkShell {
                     packages = with pkgs;
-                      [ python310Packages.python-lsp-server ];
+                      [ python310Packages.python-lsp-server
+                        python310Packages.rope
+                        python310Packages.pyflakes
+                        python310Packages.mccabe
+                        python310Packages.pycodestyle
+                        python310Packages.mypy
+                        python310Packages.flake8
+                        python310Packages.pylint
+
+                      ];
 
                     inputsFrom =
                       [ self.packages.${system}.default ];
