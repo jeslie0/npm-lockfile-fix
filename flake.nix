@@ -1,5 +1,5 @@
 {
-  description = "A very basic python flake template, providing a devshell.";
+  description = "Add missing integrity and resolved fields to a package-lock.json file.";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -21,13 +21,13 @@
         );
 
       pyPkgs = system:
-        nixpkgsFor.${system}.python310Packages;
+        nixpkgsFor.${system}.python312Packages;
 
       packageName = with builtins;
-        head (match "^.*name[[:space:]]*=[[:space:]][\"]([^[:space:]]*)[\"][,].*$" (readFile ./setup.py));
+        head (match "^.*name[[:space:]]*=[[:space:]]*[\"]([^[:space:]]*)[\"][,].*$" (readFile ./setup.py));
 
       version = with builtins;
-        head (match "^.*version[[:space:]]*=[[:space:]][\"]([^[:space:]]*)[\"][,].*$" (readFile ./setup.py));
+        head (match "^.*version[[:space:]]*=[[:space:]]*[\"]([^[:space:]]*)[\"][,].*$" (readFile ./setup.py));
 
       in
       {
@@ -36,20 +36,35 @@
             let
               pkgs =
                 nixpkgsFor.${system};
-
             in
               {
-                default = (pyPkgs system).buildPythonPackage {
-                  pname = packageName;
-                  inherit version;
-                  src = ./.;
-                  doCheck = false;
 
-                  propagatedBuildInputs = [ (pyPkgs system).requests ];
+                default =
+                  self.packages.${system}.npm-lockfile-fix;
+
+                npm-lockfile-fix = (pyPkgs system).buildPythonPackage {
+                  inherit version;
+                  pname =
+                    packageName;
+
+                  src =
+                    ./.;
+
+                  doCheck =
+                    false;
+
+                  propagatedBuildInputs =
+                    [ (pyPkgs system).requests ];
+
                   meta = {
-                    homepage = "https://github.com/jeslie0/npm-lockfile-fix";
-                    description = "";
-                    license = pkgs.lib.licenses.mit;
+                    homepage =
+                      "https://github.com/jeslie0/npm-lockfile-fix";
+
+                    description =
+                      "Add missing integrity and resolved fields to a package-lock.json file.";
+
+                    license =
+                      pkgs.lib.licenses.mit;
                   };
                 };
               }
@@ -64,16 +79,15 @@
               {
                 default =
                   pkgs.mkShell {
-                    packages = with pkgs;
-                      [ python310Packages.python-lsp-server
-                        python310Packages.rope
-                        python310Packages.pyflakes
-                        python310Packages.mccabe
-                        python310Packages.pycodestyle
-                        python310Packages.mypy
-                        python310Packages.flake8
-                        python310Packages.pylint
-
+                    packages = with pkgs.python312Packages;
+                      [ python-lsp-server
+                        rope
+                        pyflakes
+                        mccabe
+                        pycodestyle
+                        mypy
+                        flake8
+                        pylint
                       ];
 
                     inputsFrom =

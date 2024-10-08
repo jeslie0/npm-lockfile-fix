@@ -1,6 +1,6 @@
 import json
-import sys
 import requests
+import argparse
 
 # Set the URL of the registry
 REGISTRY_URL = 'https://registry.npmjs.org/'
@@ -15,7 +15,7 @@ def get_lockfile_json(lockfile_path: str):
     return lockfile_json
 
 
-def loop_through_packages(packages: json) -> None:
+def loop_through_packages(packages: json, onlyWithoutResolved: bool) -> None:
     """Loop over each package in the packages section of the lockfile"""
 
     # Establish a session to allow a connection to the same host to persist.
@@ -26,14 +26,22 @@ def loop_through_packages(packages: json) -> None:
         if package_key == "" or "node_modules/" not in package_key:
             continue
 
-        package: str = packages[package_key]
+        package: json = packages[package_key]
         package_name: str = package.get("name") or package_key.split("node_modules/")[-1]
 
         # Check if the package is missing resolved and integrity fields
         noResolved: bool = 'resolved' not in package
         noIntegrity: bool = 'integrity' not in package
         noLink: bool = 'link' not in package
-        if noResolved or (noIntegrity and noLink):
+
+        # Define whether or not the json should be updated. Normally,
+        # we update the json if there is no resolved, or noIntegrity
+        # and noLink.
+        shouldBeUpdated: bool = noResolved or (noIntegrity and noLink)
+        if onlyWithoutResolved:
+            shouldBeUpdated = (not noResolved) and noIntegrity and noLink
+
+        if shouldBeUpdated:
             # Get the package version from the lockfile
             version: str = package['version']
 
@@ -63,18 +71,57 @@ def save_json(data: json, path: str) -> None:
         json.dump(data, f, indent=2)
 
 
+def makeParser():
+    parser = argparse.ArgumentParser(
+        prog='npm-lockfile-fix',
+        description='Add missing integrity and resolved fields to a package-lock.json file. By default this will modify the specified file.',
+    )
+
+    parser.add_argument(
+        "filename",
+        help="the package-lock.json file to patch"
+    )
+    parser.add_argument(
+        "-r",
+        action='store_true',
+        help='only patch dependencies without a resolve field'
+    )
+    parser.add_argument(
+        "-o", "--output",
+        action="store_const",
+        help="leave input file unmodified and output to specified file"
+    )
+    parser.add_argument(
+        "--cout",
+        action="store_true",
+        help="leave input file unmodified and output to stdout"
+    )
+
+    return parser
+
+
 def main():
-    # Get the path to the package-lock.json file from the command-line arguments
-    if len(sys.argv) != 2:
-        print('Usage: npm-fixer /path/to/package-lock.json')
-        sys.exit(1)
-    lockfile_path = sys.argv[1]
+    args = makeParser().parse_args()
+
+    lockfile_path = args.filename
 
     lockfile_json = get_lockfile_json(lockfile_path)
 
-    loop_through_packages(lockfile_json['packages'])
+    loop_through_packages(lockfile_json['packages'], args.r)
 
-    save_json(lockfile_json, lockfile_path)
+    if args.cout:
+        print(json.dumps(lockfile_json))
+        return 0
+
+    outpath = lockfile_path if args.output is None else args.output
+
+    save_json(lockfile_json, outpath)
+
+    return 0
+
+
+
+
 
 
 if __name__ == "__main__":
