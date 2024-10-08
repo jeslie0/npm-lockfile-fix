@@ -1,0 +1,22 @@
+name: Run tests
+run-name: Tests
+on:
+  push
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setting up Checkout
+        uses: actions/checkout@v3
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Nix
+        uses: cachix/install-nix-action@v18
+        with:
+          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Try to build package
+        run: |
+          nix develop .#default --command python3 ./src/tests.py

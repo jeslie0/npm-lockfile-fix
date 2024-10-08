@@ -42,10 +42,17 @@
                 default =
                   self.packages.${system}.npm-lockfile-fix;
 
-                npm-lockfile-fix = (pyPkgs system).buildPythonPackage {
+                npm-lockfile-fix = (pyPkgs system).buildPythonApplication {
                   inherit version;
                   pname =
                     packageName;
+
+                  pyproject = true;
+
+                  build-system =
+                    [ (pyPkgs system).setuptools ];
+
+                  dontwrapPythonPrograms = true;
 
                   src =
                     ./.;
@@ -54,7 +61,7 @@
                     false;
 
                   propagatedBuildInputs =
-                    [ (pyPkgs system).requests ];
+                    [ (pyPkgs system).requests (pyPkgs system).setuptools ];
 
                   meta = {
                     homepage =
