@@ -75,10 +75,10 @@ def loop_through_packages(
                 my_print(f"Status code: {response.status_code}.", use_cout)
 
 
-def save_json(data: json, path: str) -> None:
+def save_json(data: json, path: str, indent: int) -> None:
     """Write the json data to given file path."""
     with open(path, 'w') as f:
-        json.dump(data, f, indent=2)
+        json.dump(data, f, indent=indent)
 
 
 def make_parser():
@@ -105,6 +105,12 @@ def make_parser():
         "--cout",
         action="store_true",
         help="leave input file unmodified and output to stdout"
+    )
+    parser.add_argument(
+        "--indent",
+        type=int,
+        default=2,
+        help="number of spaces to indent output with"
     )
 
     return parser

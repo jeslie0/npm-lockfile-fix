@@ -15,7 +15,7 @@ def main_impl(args):
 
     outpath = lockfile_path if args.output is None else args.output
 
-    save_json(lockfile_json, outpath)
+    save_json(lockfile_json, outpath, args.indent)
 
     return 0
 
