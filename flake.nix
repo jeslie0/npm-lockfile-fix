@@ -64,6 +64,8 @@
                     [ (pyPkgs system).requests (pyPkgs system).setuptools ];
 
                   meta = {
+                    mainProgram = "npm-lockfile-fix";
+
                     homepage =
                       "https://github.com/jeslie0/npm-lockfile-fix";
 
